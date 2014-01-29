@@ -1,21 +1,39 @@
 package com.zaprice.dailytodo;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends Activity {
 	
 	ArrayList<String> tasks;
-	ArrayList<Integer> done;
+	ArrayList<Boolean> done;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		assert(tasks.size() == done.size());
+		Iterator<String> tasksIt = tasks.iterator();
+		Iterator<Boolean> doneIt = done.iterator();
+		while(tasksIt.hasNext() && doneIt.hasNext()) {
+			if(doneIt.next()) {
+				tasksIt.next();
+			} else {
+				String write = tasksIt.next();
+				//TODO: make checkable task from string write
+			}
+		}
 	}
 
 	@Override
@@ -29,7 +47,8 @@ public class MainActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.add_task:
-				
+				Intent addTaskIntent = new Intent(this, AddTaskActivity.class);
+				startActivity(addTaskIntent);
 				return true;
 			default:
 				return false;
