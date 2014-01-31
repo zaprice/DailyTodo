@@ -2,43 +2,55 @@ package com.zaprice.dailytodo;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	
 	ArrayList<String> tasks;
-	ArrayList<Boolean> done;
-	final int ADD_TASK = 0;
+	ArrayList<Integer> done;
+	LinearLayout taskList;
+	final int ADD_TASK = 0, TRUE = 1, FALSE = 0;
 	final String TAG = "DEBUG";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		taskList = (LinearLayout) findViewById(R.id.taskList);
 		tasks = new ArrayList<String>();
-		done = new ArrayList<Boolean>();
+		done = new ArrayList<Integer>();
+		loadTasks();
 	}
 	
 	@Override
 	protected void onStart() {
-		super.onStart();
-		/*assert(tasks.size() == done.size());
+		super.onStart();		
+		assert(tasks.size() == done.size());
 		Iterator<String> tasksIt = tasks.iterator();
-		Iterator<Boolean> doneIt = done.iterator();
+		Iterator<Integer> doneIt = done.iterator();
+		taskList.removeAllViews();
 		while(tasksIt.hasNext() && doneIt.hasNext()) {
-			if(doneIt.next()) {
+			if(doneIt.next() == Integer.valueOf(TRUE)) {
 				tasksIt.next();
 			} else {
-				String write = tasksIt.next();
+				TextView t = new TextView(this);
+				t.setText(tasksIt.next());
+				t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+				taskList.addView(t);
 				//TODO: make checkable task from string write
 			}
-		}*/
+		}
 	}
 
 	@Override
@@ -65,9 +77,35 @@ public class MainActivity extends Activity {
 		if(resultCode == RESULT_OK) {
 			Bundle taskBundle = data.getExtras();
 			tasks.add(taskBundle.getString("task name"));
-			done.add(Boolean.valueOf(false));
+			done.add(Integer.valueOf(0));
 			Log.i(TAG, tasks.get(tasks.size()- 1));
 			return;
+		}
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		saveTasks();
+	}
+	
+	private void saveTasks() {
+		SharedPreferences data = getPreferences(MODE_PRIVATE);
+		SharedPreferences.Editor editor = data.edit();
+		Iterator<String> tasksIt = tasks.iterator();
+		Iterator<Integer> doneIt = done.iterator();
+		while(tasksIt.hasNext() && doneIt.hasNext()) {
+			editor.putInt(tasksIt.next(), doneIt.next().intValue());
+		}
+		editor.apply();
+	}
+	
+	private void loadTasks() {
+		SharedPreferences data = getPreferences(MODE_PRIVATE);
+		Map<String, ?> dataMap = data.getAll();
+		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
+			tasks.add(entry.getKey());
+			done.add(Integer.valueOf(entry.getValue().toString()));
 		}
 	}
 }
