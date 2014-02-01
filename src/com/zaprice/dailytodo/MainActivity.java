@@ -12,14 +12,17 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	
 	ArrayList<String> tasks;
 	ArrayList<Integer> done;
-	LinearLayout taskList;
+	ListView taskList;
+	ArrayAdapter<String> taskListAdapter;
 	final int ADD_TASK = 0, TRUE = 1, FALSE = 0;
 	final String TAG = "DEBUG";
 	
@@ -27,9 +30,11 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		taskList = (LinearLayout) findViewById(R.id.taskList);
 		tasks = new ArrayList<String>();
 		done = new ArrayList<Integer>();
+		taskList = (ListView) findViewById(R.id.taskList);
+		taskListAdapter = new ArrayAdapter<String>(this, R.layout.list_item);
+		taskList.setAdapter(taskListAdapter);
 		loadTasks();
 	}
 	
@@ -39,15 +44,16 @@ public class MainActivity extends Activity {
 		assert(tasks.size() == done.size());
 		Iterator<String> tasksIt = tasks.iterator();
 		Iterator<Integer> doneIt = done.iterator();
-		taskList.removeAllViews();
+		taskListAdapter.clear();
 		while(tasksIt.hasNext() && doneIt.hasNext()) {
 			if(doneIt.next() == Integer.valueOf(TRUE)) {
 				tasksIt.next();
 			} else {
-				TextView t = new TextView(this);
-				t.setText(tasksIt.next());
-				t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
-				taskList.addView(t);
+				taskListAdapter.add(tasksIt.next());
+				//TextView t = new TextView(this);
+				//t.setText(tasksIt.next());
+				//t.setTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+				//taskList.addView(t);
 				//TODO: make checkable task from string write
 			}
 		}
