@@ -46,9 +46,8 @@ public class MainActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				Log.i(TAG, ((TextView) view).getText().toString());
-				strikeText((TextView) view);
-				//TODO: start here; this doesn't actually work
+				TextView t = (TextView) view;
+				strikeText(t);
 			}
 		});
 		
@@ -119,8 +118,6 @@ public class MainActivity extends Activity {
 			taskListAdapter.add(next);
 			if(doneIt.next() == Integer.valueOf(TRUE)) {
 				strikeText(next);
-			} else {
-				taskListAdapter.add(tasksIt.next());
 			}
 		}
 	}
@@ -150,23 +147,22 @@ public class MainActivity extends Activity {
 	}
 	
 	private void strikeText(String task) {
-		//Adds strikethrough decoration to completed task
+		//Adds strikethrough decoration to completed task, or removes decoration if it already has one
 		//Called in drawTasks
-		TextView t = (TextView) taskList.findViewById((int) taskListAdapter.getItemId(taskListAdapter.getPosition(task)));
-		t.setPaintFlags(t.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+		strikeText((TextView) taskList.findViewById((int) taskListAdapter.getItemId(taskListAdapter.getPosition(task))));
+		//TODO: this is broken; can't look up a TextView by its String
 	}
 	
 	private void strikeText(TextView t) {
-		//Adds strikethrough decoration to completed task
-		//Called onItemClick
-		t.setPaintFlags(t.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+		//Adds strikethrough decoration to completed task, or removes decoration if it already has one
+		//Called onItemClick, strikeText(String)
+		t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
+		setDoneFlag(tasks.indexOf(t.getText().toString()));
 	}
 	
-	private void unstrikeText(String task) {
-		//Removes strikethrough decoration from task
-		//TODO: Called onItemClick
-		TextView t = (TextView) taskList.findViewById((int) taskListAdapter.getItemId(taskListAdapter.getPosition(task)));
-		t.setPaintFlags(t.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG);
+	private void setDoneFlag(int index) {
+		//Flips the done flag when task is crossed/uncrossed
+		//Called in strikeText
+		done.set(index, Integer.valueOf(done.get(index).intValue() ^ TRUE));
 	}
-	
 }
