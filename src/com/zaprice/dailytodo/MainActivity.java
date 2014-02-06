@@ -21,6 +21,11 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * 
+ * @author zaprice
+ *
+ **/
 public class MainActivity extends Activity {
 	
 	//Constants
@@ -35,18 +40,23 @@ public class MainActivity extends Activity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		//Called when the app is first started; next call in the lifecycle is onStart
+		/**
+		 * Called when the app is first started; next call in the lifecycle is onStart
+		**/
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
 		tasks = new ArrayList<Task>();
 		taskList = (ListView) findViewById(R.id.taskList);
 		taskListAdapter = new TaskListAdapter(this, R.layout.list_item, tasks);
 		taskList.setAdapter(taskListAdapter);
-		taskListAdapter.setNotifyOnChange(true); //TODO: maybe have adapter add/remove itself
+		taskListAdapter.setNotifyOnChange(true);
 		
 		taskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-			//Listener used to detect when user touches a task
-			//On touch, a task will be marked done and given a strikethrough decoration
+			/**
+			 * Listener used to detect when user touches a task
+			 * On touch, a task will be marked done and given a strikethrough decoration
+			 **/
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				TextView t = (TextView) view;
@@ -61,15 +71,19 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		//Inflate the menu; this adds the "add task" button to the menu bar
+		/**
+		* Inflate the menu; this adds the "add task" button to the menu bar
+		**/
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 	
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		//Inflate ContextMenu
-		//Called when user long presses a list item
+		/**
+		* Inflate ContextMenu
+		* Called when user long presses a list item
+		**/
 		super.onCreateContextMenu(menu, v, menuInfo);
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.context_menu, menu);
@@ -77,8 +91,10 @@ public class MainActivity extends Activity {
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		//Called when the add task menu button is pressed
-		//Starts an AddTaskActivity
+		/**
+		* Called when the add task menu button is pressed
+		* Starts an AddTaskActivity
+		**/
 		switch (item.getItemId()) {
 			case R.id.add_task:
 				Intent addTaskIntent = new Intent(this, AddTaskActivity.class);
@@ -105,29 +121,35 @@ public class MainActivity extends Activity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		//Called back from AddTaskActivity when it ends
-		//Passes a Bundle containing the task name
-		//Task is added to memory; next call in the lifecycle is onStart
+		/**
+		* Called back from AddTaskActivity when it ends
+		* Passes a Bundle containing the task name
+		* Task is added to memory; next call in the lifecycle is onStart
+		**/
 		if(resultCode == RESULT_OK) {
 			Bundle taskBundle = data.getExtras();
-			tasks.add(new Task(taskBundle.getString("task name")));
-			taskListAdapter.notifyDataSetChanged(); //TODO: maybe have adapter add/remove itself
-			Log.i(TAG, tasks.get(tasks.size()- 1).toString());
+			taskListAdapter.add(new Task(taskBundle.getString("task name")));
+			
+			Log.i(TAG, tasks.get(tasks.size()- 1).toString()); //For debugging
 			return;
 		}
 	}
 	
 	@Override
 	public void onPause() {
-		//Called when this Activity is no longer in focus
-		//Calls saveTasks to store tasks in SavedPreferences
+		/**
+		 * Called when this Activity is no longer in focus
+		* Calls saveTasks to store tasks in SavedPreferences
+		**/
 		super.onPause();
 		saveTasks();
 	}
 	
 	private void saveTasks() {
-		//Saves task list and done flags to SavedPreferences
-		//Called onPause
+		/**
+		* Saves task list and done flags to SavedPreferences
+		* Called onPause
+		**/
 		SharedPreferences data = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = data.edit();
 		editor.clear();
@@ -143,35 +165,43 @@ public class MainActivity extends Activity {
 	}
 	
 	private void loadTasks() {
-		//Loads task list and done flags from SavedPreferences
-		//Called onCreate
+		/**
+		* Loads task list and done flags from SavedPreferences
+		* Called onCreate
+		**/
 		SharedPreferences data = getPreferences(MODE_PRIVATE);
 		Map<String, ?> dataMap = data.getAll();
 		
 		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
 			//TODO: map does not guarantee stable ordering, may not be preserved across instances; maybe should fix that
-			tasks.add(new Task(entry.getKey(), Integer.parseInt(entry.getValue().toString()) == TRUE));
+			taskListAdapter.add(new Task(entry.getKey(), Integer.parseInt(entry.getValue().toString()) == TRUE));
 		}
-		taskListAdapter.notifyDataSetChanged(); //TODO: maybe have adapter add/remove itself
 	}
 	
 	private void delete(long id) {
-		//TODO: doesn't actually work; need to add ids to TextViews 
+		/**
+		* Deletes an item from the task list
+		* Called when selected from the context menu
+		**/
+		//TODO: strikethrough removed from other items when deleting an element
 		Task t = taskListAdapter.getItem((int)id);
-		tasks.remove(t);
-		taskListAdapter.notifyDataSetChanged(); //TODO: maybe have adapter add/remove itself
+		taskListAdapter.remove(t);
 	}
 	
 	private void strikeText(TextView t) {
-		//Adds strikethrough decoration to completed task, or removes decoration if it already has one
-		//Called onItemClick, strikeText(String)
+		/**
+		* Adds strikethrough decoration to completed task, or removes decoration if it already has one
+		* Called onItemClick, strikeText(String)
+		**/
 		t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
 		setDoneFlag(t.getText().toString());
 	}
 	
 	private void setDoneFlag(String taskName) {
-		//Flips the done flag when task is crossed/uncrossed
-		//Called in strikeText
+		/**
+		* Flips the done flag when task is crossed/uncrossed
+		* Called in strikeText
+		**/
 		Iterator<Task> taskIt = tasks.iterator();
 		Task t;
 		while(taskIt.hasNext()) {

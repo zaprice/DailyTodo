@@ -5,19 +5,26 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-
+/**
+ * 
+ * @author zaprice
+ *
+ */
 public class AddTaskActivity extends Activity {
 
-	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 	    super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_add);
+		
 		//UI elements; EditText lets the user type in a name for their task
 		final EditText taskName = (EditText) findViewById(R.id.editText1);
 		final Button addTask = (Button) findViewById(R.id.button1);
+		
         addTask.setOnClickListener(new View.OnClickListener() {
-        	//Listener used to detect when a user is finished specifying their task
+        	/**
+        	* Listener used to detect when a user is finished specifying their task
+        	**/
             public void onClick(View v) {
             	if(taskName.getText().toString() == "") {
             		//Cancels adding a task if the name is empty
@@ -34,7 +41,6 @@ public class AddTaskActivity extends Activity {
 	
 	@Override
 	public void onBackPressed() {
-		//Cancels adding a task and finishes the activity
 		setResult(RESULT_CANCELED);
 		super.onBackPressed();
 	}

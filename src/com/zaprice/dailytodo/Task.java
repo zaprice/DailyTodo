@@ -1,5 +1,11 @@
 package com.zaprice.dailytodo;
 
+/**
+ * 
+ * @author zaprice
+ * Internal representation of the user's tasks
+ * 
+ */
 public class Task {
 	
 	private String taskName;

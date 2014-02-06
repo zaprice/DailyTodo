@@ -9,6 +9,13 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+/**
+ * 
+ * @author zaprice
+ * Subclass of ArrayAdapter<Task>
+ * Used to handle crossing off tasks when view is changed
+ *
+ */
 public class TaskListAdapter extends ArrayAdapter<Task> {
 
 	public TaskListAdapter(Context context, int resource, List<Task> objects) {
