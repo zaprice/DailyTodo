@@ -155,6 +155,7 @@ public class MainActivity extends Activity {
 		//Called onPause
 		SharedPreferences data = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = data.edit();
+		editor.clear();
 		Iterator<Task> tasksIt = tasks.iterator();
 		Task t;
 		int i;
