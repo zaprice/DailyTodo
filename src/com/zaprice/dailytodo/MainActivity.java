@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -20,28 +19,29 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	
-	ArrayList<String> tasks;
-	ArrayList<Integer> done;
-	ListView taskList;
-	ArrayAdapter<String> taskListAdapter;
+	//Constants
 	final int ADD_TASK = 0, TRUE = 1, FALSE = 0;
 	final String TAG = "DEBUG";
+	
+	//Data
+	private ArrayList<Task> tasks;
+	private ListView taskList;
+	private ArrayAdapter<Task> taskListAdapter;
+
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		//Called when the app is first started; next call in the lifecycle is onStart
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		tasks = new ArrayList<String>();
-		done = new ArrayList<Integer>();
+		tasks = new ArrayList<Task>();
 		taskList = (ListView) findViewById(R.id.taskList);
-		taskListAdapter = new ArrayAdapter<String>(this, R.layout.list_item, tasks); //TODO: I just added tasks, maybe things will be different now
+		taskListAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasks);
 		taskList.setAdapter(taskListAdapter);
 		
 		taskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -54,14 +54,6 @@ public class MainActivity extends Activity {
 			}
 		});
 		
-		/*taskList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-		    @Override
-		    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-		        //TODO
-		    	return true;
-		    }
-		});*/
-		
 		loadTasks();
 		registerForContextMenu(taskList);
 	}
@@ -70,7 +62,6 @@ public class MainActivity extends Activity {
 	protected void onStart() {
 		//Called whenever MainActivity is resumed
 		super.onStart();		
-		assert(tasks.size() == done.size());		//To make sure nothing silly happens when adding/removing tasks
 		drawTasks();
 	}
 
@@ -124,9 +115,9 @@ public class MainActivity extends Activity {
 		//Task is added to memory; next call in the lifecycle is onStart
 		if(resultCode == RESULT_OK) {
 			Bundle taskBundle = data.getExtras();
-			tasks.add(taskBundle.getString("task name"));
-			done.add(Integer.valueOf(0));
-			Log.i(TAG, tasks.get(tasks.size()- 1));
+			tasks.add(new Task(taskBundle.getString("task name")));
+			taskListAdapter.notifyDataSetChanged();
+			Log.i(TAG, tasks.get(tasks.size()- 1).toString());
 			return;
 		}
 	}
@@ -161,10 +152,13 @@ public class MainActivity extends Activity {
 		//Called onPause
 		SharedPreferences data = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = data.edit();
-		Iterator<String> tasksIt = tasks.iterator();
-		Iterator<Integer> doneIt = done.iterator();
-		while(tasksIt.hasNext() && doneIt.hasNext()) {
-			editor.putInt(tasksIt.next(), doneIt.next().intValue());
+		Iterator<Task> tasksIt = tasks.iterator();
+		Task t;
+		int i;
+		while(tasksIt.hasNext()) {
+			t = tasksIt.next();
+			i = t.isDone() ? TRUE : FALSE;
+			editor.putInt(t.toString(), i);
 		}
 		editor.apply();
 	}
@@ -174,9 +168,9 @@ public class MainActivity extends Activity {
 		//Called onCreate
 		SharedPreferences data = getPreferences(MODE_PRIVATE);
 		Map<String, ?> dataMap = data.getAll();
+		
 		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
-			tasks.add(entry.getKey());
-			done.add(Integer.valueOf(entry.getValue().toString()));
+			tasks.add(new Task(entry.getKey(), Integer.parseInt(entry.getValue().toString()) == TRUE));
 		}
 		taskListAdapter.notifyDataSetChanged();
 	}
@@ -199,12 +193,20 @@ public class MainActivity extends Activity {
 		//Adds strikethrough decoration to completed task, or removes decoration if it already has one
 		//Called onItemClick, strikeText(String)
 		t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
-		setDoneFlag(tasks.indexOf(t.getText().toString()));
+		setDoneFlag(t.getText().toString());
 	}
 	
-	private void setDoneFlag(int index) {
+	private void setDoneFlag(String taskName) {
 		//Flips the done flag when task is crossed/uncrossed
 		//Called in strikeText
-		done.set(index, Integer.valueOf(done.get(index).intValue() ^ TRUE));
+		Iterator<Task> taskIt = tasks.iterator();
+		Task t;
+		while(taskIt.hasNext()) {
+			t = taskIt.next();
+			if(t.toString().equals(taskName)) {
+				t.markDone();
+				break;
+			}
+		}
 	}
 }
