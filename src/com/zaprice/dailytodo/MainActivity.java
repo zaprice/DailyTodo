@@ -43,6 +43,7 @@ public class MainActivity extends Activity {
 		taskList = (ListView) findViewById(R.id.taskList);
 		taskListAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasks);
 		taskList.setAdapter(taskListAdapter);
+		taskListAdapter.setNotifyOnChange(true); //TODO: maybe have adapter add/remove itself
 		
 		taskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			//Listener used to detect when user touches a task
@@ -51,6 +52,7 @@ public class MainActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				TextView t = (TextView) view;
 				strikeText(t);
+				Log.i(TAG, Long.toString(id));
 			}
 		});
 		
@@ -101,6 +103,7 @@ public class MainActivity extends Activity {
 	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 	    switch (item.getItemId()) {
 	    	case R.id.delete:
+	    		Log.i(TAG, Long.toString(info.id));
 	    		delete(info.id);
 	    		return true;
 	    	default:
@@ -116,7 +119,7 @@ public class MainActivity extends Activity {
 		if(resultCode == RESULT_OK) {
 			Bundle taskBundle = data.getExtras();
 			tasks.add(new Task(taskBundle.getString("task name")));
-			taskListAdapter.notifyDataSetChanged();
+			taskListAdapter.notifyDataSetChanged(); //TODO: maybe have adapter add/remove itself
 			Log.i(TAG, tasks.get(tasks.size()- 1).toString());
 			return;
 		}
@@ -170,16 +173,17 @@ public class MainActivity extends Activity {
 		Map<String, ?> dataMap = data.getAll();
 		
 		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
+			//TODO: map does not guarantee stable ordering, may not be preserved across instances; maybe should fix that
 			tasks.add(new Task(entry.getKey(), Integer.parseInt(entry.getValue().toString()) == TRUE));
 		}
-		taskListAdapter.notifyDataSetChanged();
+		taskListAdapter.notifyDataSetChanged(); //TODO: maybe have adapter add/remove itself
 	}
 	
 	private void delete(long id) {
 		//TODO: doesn't actually work; need to add ids to TextViews 
-		TextView t = (TextView) findViewById((int) id);
-		tasks.remove(t.getText().toString());
-		taskListAdapter.notifyDataSetChanged();
+		Task t = taskListAdapter.getItem((int)id);
+		tasks.remove(t);
+		taskListAdapter.notifyDataSetChanged(); //TODO: maybe have adapter add/remove itself
 	}
 	
 	private void strikeText(String task) {

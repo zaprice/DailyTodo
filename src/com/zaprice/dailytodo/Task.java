@@ -22,6 +22,10 @@ public class Task {
 		isDone = !isDone;
 	}
 	
+	public long getId() {
+		return taskName.hashCode();
+	}
+	
 	public String toString() {
 		return taskName;
 	}
