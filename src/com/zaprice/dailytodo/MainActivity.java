@@ -11,10 +11,14 @@ import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -44,14 +48,22 @@ public class MainActivity extends Activity {
 			//Listener used to detect when user touches a task
 			//On touch, a task will be marked done and given a strikethrough decoration
 			@Override
-			public void onItemClick(AdapterView<?> parent, View view, int position,
-					long id) {
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				TextView t = (TextView) view;
 				strikeText(t);
 			}
 		});
 		
+		/*taskList.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+		    @Override
+		    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+		        //TODO
+		    	return true;
+		    }
+		});*/
+		
 		loadTasks();
+		registerForContextMenu(taskList);
 	}
 	
 	@Override
@@ -64,9 +76,18 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds the "add task" button to the menu bar
+		//Inflate the menu; this adds the "add task" button to the menu bar
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
+	}
+	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+		//Inflate ContextMenu
+		//Called when user long presses a list item
+		super.onCreateContextMenu(menu, v, menuInfo);
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.context_menu, menu);
 	}
 	
 	@Override
@@ -82,6 +103,18 @@ public class MainActivity extends Activity {
 			default:
 				return false;
 		}
+	}
+	
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+	    switch (item.getItemId()) {
+	    	case R.id.delete:
+	    		delete(info.id);
+	    		return true;
+	    	default:
+	    		return super.onContextItemSelected(item);
+	    }
 	}
 	
 	@Override
@@ -146,10 +179,14 @@ public class MainActivity extends Activity {
 		}
 	}
 	
+	private void delete(long id) {
+		//TODO
+	}
+	
 	private void strikeText(String task) {
 		//Adds strikethrough decoration to completed task, or removes decoration if it already has one
 		//Called in drawTasks
-		strikeText((TextView) taskList.findViewById((int) taskListAdapter.getItemId(taskListAdapter.getPosition(task))));
+		//strikeText((TextView) taskList.findViewById((int) taskListAdapter.getItemId(taskListAdapter.getPosition(task))));
 		//TODO: this is broken; can't look up a TextView by its String
 	}
 	
