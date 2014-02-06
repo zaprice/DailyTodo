@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
 		tasks = new ArrayList<String>();
 		done = new ArrayList<Integer>();
 		taskList = (ListView) findViewById(R.id.taskList);
-		taskListAdapter = new ArrayAdapter<String>(this, R.layout.list_item);
+		taskListAdapter = new ArrayAdapter<String>(this, R.layout.list_item, tasks); //TODO: I just added tasks, maybe things will be different now
 		taskList.setAdapter(taskListAdapter);
 		
 		taskList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -142,7 +142,8 @@ public class MainActivity extends Activity {
 	private void drawTasks() {
 		//Adds tasks in memory to the list on-screen
 		//Called onStart
-		Iterator<String> tasksIt = tasks.iterator();
+		//TODO: alter this so it only strikes tasks
+		/*Iterator<String> tasksIt = tasks.iterator();
 		Iterator<Integer> doneIt = done.iterator();
 		taskListAdapter.clear();
 		String next;
@@ -152,7 +153,7 @@ public class MainActivity extends Activity {
 			if(doneIt.next() == Integer.valueOf(TRUE)) {
 				strikeText(next);
 			}
-		}
+		}*/
 	}
 	
 	private void saveTasks() {
@@ -177,10 +178,14 @@ public class MainActivity extends Activity {
 			tasks.add(entry.getKey());
 			done.add(Integer.valueOf(entry.getValue().toString()));
 		}
+		taskListAdapter.notifyDataSetChanged();
 	}
 	
 	private void delete(long id) {
-		//TODO
+		//TODO: doesn't actually work; need to add ids to TextViews 
+		TextView t = (TextView) findViewById((int) id);
+		tasks.remove(t.getText().toString());
+		taskListAdapter.notifyDataSetChanged();
 	}
 	
 	private void strikeText(String task) {
