@@ -18,7 +18,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -31,7 +30,7 @@ public class MainActivity extends Activity {
 	//Data
 	private ArrayList<Task> tasks;
 	private ListView taskList;
-	private ArrayAdapter<Task> taskListAdapter;
+	private TaskListAdapter taskListAdapter;
 
 	
 	@Override
@@ -41,7 +40,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		tasks = new ArrayList<Task>();
 		taskList = (ListView) findViewById(R.id.taskList);
-		taskListAdapter = new ArrayAdapter<Task>(this, R.layout.list_item, tasks);
+		taskListAdapter = new TaskListAdapter(this, R.layout.list_item, tasks);
 		taskList.setAdapter(taskListAdapter);
 		taskListAdapter.setNotifyOnChange(true); //TODO: maybe have adapter add/remove itself
 		
@@ -58,13 +57,6 @@ public class MainActivity extends Activity {
 		
 		loadTasks();
 		registerForContextMenu(taskList);
-	}
-	
-	@Override
-	protected void onStart() {
-		//Called whenever MainActivity is resumed
-		super.onStart();		
-		drawTasks();
 	}
 
 	@Override
@@ -133,23 +125,6 @@ public class MainActivity extends Activity {
 		saveTasks();
 	}
 	
-	private void drawTasks() {
-		//Adds tasks in memory to the list on-screen
-		//Called onStart
-		//TODO: alter this so it only strikes tasks
-		/*Iterator<String> tasksIt = tasks.iterator();
-		Iterator<Integer> doneIt = done.iterator();
-		taskListAdapter.clear();
-		String next;
-		while(tasksIt.hasNext() && doneIt.hasNext()) {
-			next = tasksIt.next();
-			taskListAdapter.add(next);
-			if(doneIt.next() == Integer.valueOf(TRUE)) {
-				strikeText(next);
-			}
-		}*/
-	}
-	
 	private void saveTasks() {
 		//Saves task list and done flags to SavedPreferences
 		//Called onPause
@@ -185,13 +160,6 @@ public class MainActivity extends Activity {
 		Task t = taskListAdapter.getItem((int)id);
 		tasks.remove(t);
 		taskListAdapter.notifyDataSetChanged(); //TODO: maybe have adapter add/remove itself
-	}
-	
-	private void strikeText(String task) {
-		//Adds strikethrough decoration to completed task, or removes decoration if it already has one
-		//Called in drawTasks
-		//strikeText((TextView) taskList.findViewById((int) taskListAdapter.getItemId(taskListAdapter.getPosition(task))));
-		//TODO: this is broken; can't look up a TextView by its String
 	}
 	
 	private void strikeText(TextView t) {
