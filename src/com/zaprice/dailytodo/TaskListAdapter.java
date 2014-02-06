@@ -22,9 +22,17 @@ public class TaskListAdapter extends ArrayAdapter<Task> {
 		super(context, resource, objects);
 	}
 	
+	/**
+	 * Overrides getView to access TextView paint flags
+	 * Called when views are changed/recycled
+	 */
+	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		Task task = getItem(position);
 		TextView t = (TextView) super.getView(position, convertView, parent);
+		if((t.getPaintFlags() & Paint.STRIKE_THRU_TEXT_FLAG) == Paint.STRIKE_THRU_TEXT_FLAG) {
+			t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
+		}
 		if(task.isDone()) {
 			t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
 		}

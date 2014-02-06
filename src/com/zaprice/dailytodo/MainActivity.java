@@ -37,12 +37,11 @@ public class MainActivity extends Activity {
 	private ListView taskList;
 	private TaskListAdapter taskListAdapter;
 
-	
+	/**
+	 * Called when the app is first started; next call in the lifecycle is onStart
+	**/
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		/**
-		 * Called when the app is first started; next call in the lifecycle is onStart
-		**/
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
@@ -59,8 +58,7 @@ public class MainActivity extends Activity {
 			 **/
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				TextView t = (TextView) view;
-				strikeText(t);
+				strikeText((TextView) view);
 				Log.i(TAG, Long.toString(id));
 			}
 		});
@@ -69,32 +67,32 @@ public class MainActivity extends Activity {
 		registerForContextMenu(taskList);
 	}
 
+	/**
+	* Inflate the menu; this adds the "add task" button to the menu bar
+	**/
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		/**
-		* Inflate the menu; this adds the "add task" button to the menu bar
-		**/
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 	
+	/**
+	* Inflate ContextMenu
+	* Called when user long presses a list item
+	**/
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-		/**
-		* Inflate ContextMenu
-		* Called when user long presses a list item
-		**/
 		super.onCreateContextMenu(menu, v, menuInfo);
 	    MenuInflater inflater = getMenuInflater();
 	    inflater.inflate(R.menu.context_menu, menu);
 	}
 	
+	/**
+	* Called when the add task menu button is pressed
+	* Starts an AddTaskActivity
+	**/
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		/**
-		* Called when the add task menu button is pressed
-		* Starts an AddTaskActivity
-		**/
 		switch (item.getItemId()) {
 			case R.id.add_task:
 				Intent addTaskIntent = new Intent(this, AddTaskActivity.class);
@@ -119,13 +117,13 @@ public class MainActivity extends Activity {
 	    }
 	}
 	
+	/**
+	* Called back from AddTaskActivity when it ends
+	* Passes a Bundle containing the task name
+	* Task is added to memory; next call in the lifecycle is onStart
+	**/
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		/**
-		* Called back from AddTaskActivity when it ends
-		* Passes a Bundle containing the task name
-		* Task is added to memory; next call in the lifecycle is onStart
-		**/
 		if(resultCode == RESULT_OK) {
 			Bundle taskBundle = data.getExtras();
 			taskListAdapter.add(new Task(taskBundle.getString("task name")));
@@ -135,21 +133,21 @@ public class MainActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * Called when this Activity is no longer in focus
+	* Calls saveTasks to store tasks in SavedPreferences
+	**/
 	@Override
 	public void onPause() {
-		/**
-		 * Called when this Activity is no longer in focus
-		* Calls saveTasks to store tasks in SavedPreferences
-		**/
 		super.onPause();
 		saveTasks();
 	}
 	
+	/**
+	* Saves task list and done flags to SavedPreferences
+	* Called onPause
+	**/
 	private void saveTasks() {
-		/**
-		* Saves task list and done flags to SavedPreferences
-		* Called onPause
-		**/
 		SharedPreferences data = getPreferences(MODE_PRIVATE);
 		SharedPreferences.Editor editor = data.edit();
 		editor.clear();
@@ -164,11 +162,11 @@ public class MainActivity extends Activity {
 		editor.apply();
 	}
 	
+	/**
+	* Loads task list and done flags from SavedPreferences
+	* Called onCreate
+	**/
 	private void loadTasks() {
-		/**
-		* Loads task list and done flags from SavedPreferences
-		* Called onCreate
-		**/
 		SharedPreferences data = getPreferences(MODE_PRIVATE);
 		Map<String, ?> dataMap = data.getAll();
 		
@@ -178,30 +176,29 @@ public class MainActivity extends Activity {
 		}
 	}
 	
+	/**
+	* Deletes an item from the task list
+	* Called when selected from the context menu
+	**/
 	private void delete(long id) {
-		/**
-		* Deletes an item from the task list
-		* Called when selected from the context menu
-		**/
-		//TODO: strikethrough removed from other items when deleting an element
 		Task t = taskListAdapter.getItem((int)id);
 		taskListAdapter.remove(t);
 	}
 	
+	/**
+	* Adds strikethrough decoration to completed task, or removes decoration if it already has one
+	* Called onItemClick, strikeText(String)
+	**/
 	private void strikeText(TextView t) {
-		/**
-		* Adds strikethrough decoration to completed task, or removes decoration if it already has one
-		* Called onItemClick, strikeText(String)
-		**/
 		t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
 		setDoneFlag(t.getText().toString());
 	}
 	
+	/**
+	* Flips the done flag when task is crossed/uncrossed
+	* Called in strikeText
+	**/
 	private void setDoneFlag(String taskName) {
-		/**
-		* Flips the done flag when task is crossed/uncrossed
-		* Called in strikeText
-		**/
 		Iterator<Task> taskIt = tasks.iterator();
 		Task t;
 		while(taskIt.hasNext()) {
