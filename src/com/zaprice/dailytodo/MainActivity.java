@@ -29,7 +29,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 	
 	//Constants
-	final int ADD_TASK = 0, TRUE = 1, FALSE = 0;
+	final int ADD_TASK = 0;
 	final String TAG = "DEBUG";
 	
 	//Data
@@ -153,11 +153,9 @@ public class MainActivity extends Activity {
 		editor.clear();
 		Iterator<Task> tasksIt = tasks.iterator();
 		Task t;
-		int i;
 		while(tasksIt.hasNext()) {
 			t = tasksIt.next();
-			i = t.isDone() ? TRUE : FALSE;
-			editor.putInt(t.toString(), i);
+			editor.putBoolean(t.toString(), t.isDone());
 		}
 		editor.apply();
 	}
@@ -172,7 +170,7 @@ public class MainActivity extends Activity {
 		
 		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
 			//TODO: map does not guarantee stable ordering, may not be preserved across instances; maybe should fix that
-			taskListAdapter.add(new Task(entry.getKey(), Integer.parseInt(entry.getValue().toString()) == TRUE));
+			taskListAdapter.add(new Task(entry.getKey(), Boolean.valueOf(entry.getValue().toString())));
 		}
 	}
 	
