@@ -29,6 +29,13 @@ import android.widget.TextView;
  **/
 public class MainActivity extends Activity {
 	
+	/**
+	 * TODO list:
+	 * Keyboard should open when AddTaskActivity starts
+	 * Spacing between list items is not quite uniform
+	 * Trim off trailing spaces; makes strikethrough look ugly
+	 */
+	
 	//Constants
 	final int ADD_TASK = 0;
 	final String TAG = "DEBUG";
@@ -193,12 +200,12 @@ public class MainActivity extends Activity {
 		
 		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
 			//TODO: map does not guarantee stable ordering, may not be preserved across instances; maybe should fix that
-			if(entry.getKey() == "date") {
+			if(entry.getKey().equals("date")) {
 				lastUsed = new GregorianCalendar();
 				lastUsed.setTimeInMillis(Long.parseLong(entry.getValue().toString()));
-				continue;
+			}else {
+				taskListAdapter.add(new Task(entry.getKey(), Boolean.parseBoolean(entry.getValue().toString())));
 			}
-			taskListAdapter.add(new Task(entry.getKey(), Boolean.parseBoolean(entry.getValue().toString())));
 		}
 	}
 	
