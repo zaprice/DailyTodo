@@ -1,6 +1,7 @@
 package com.zaprice.dailytodo;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ public class MainActivity extends Activity {
 	private ArrayList<Task> tasks;
 	private ListView taskList;
 	private TaskListAdapter taskListAdapter;
+	private GregorianCalendar lastUsed;
 
 	/**
 	 * Called when the app is first started; next call in the lifecycle is onStart
@@ -65,6 +67,22 @@ public class MainActivity extends Activity {
 		
 		loadTasks();
 		registerForContextMenu(taskList);
+		if(lastUsed == null) {
+			lastUsed = new GregorianCalendar();
+		}
+	}
+	
+	/**
+	 * Called when app is resumed
+	 * Used to compare dates
+	 */
+	@Override
+	protected void onStart() {
+		super.onStart();
+		GregorianCalendar today = new GregorianCalendar(); 
+		if(dayHasPassed(lastUsed, today)) {
+			resetTasks();
+		}
 	}
 
 	/**
@@ -104,6 +122,10 @@ public class MainActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * Called when delete is selected from the context menu
+	 * Deletes a task
+	 */
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 	    AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
@@ -129,7 +151,6 @@ public class MainActivity extends Activity {
 			taskListAdapter.add(new Task(taskBundle.getString("task name")));
 			
 			Log.i(TAG, tasks.get(tasks.size()- 1).toString()); //For debugging
-			return;
 		}
 	}
 	
@@ -144,7 +165,7 @@ public class MainActivity extends Activity {
 	}
 	
 	/**
-	* Saves task list and done flags to SavedPreferences
+	* Saves tasks and last used date to SavedPreferences
 	* Called onPause
 	**/
 	private void saveTasks() {
@@ -157,11 +178,13 @@ public class MainActivity extends Activity {
 			t = tasksIt.next();
 			editor.putBoolean(t.toString(), t.isDone());
 		}
+		editor.putLong("date", lastUsed.getTimeInMillis());
 		editor.apply();
+		
 	}
 	
 	/**
-	* Loads task list and done flags from SavedPreferences
+	* Loads tasks and last used date from SavedPreferences
 	* Called onCreate
 	**/
 	private void loadTasks() {
@@ -170,13 +193,18 @@ public class MainActivity extends Activity {
 		
 		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
 			//TODO: map does not guarantee stable ordering, may not be preserved across instances; maybe should fix that
-			taskListAdapter.add(new Task(entry.getKey(), Boolean.valueOf(entry.getValue().toString())));
+			if(entry.getKey() == "date") {
+				lastUsed = new GregorianCalendar();
+				lastUsed.setTimeInMillis(Long.parseLong(entry.getValue().toString()));
+				continue;
+			}
+			taskListAdapter.add(new Task(entry.getKey(), Boolean.parseBoolean(entry.getValue().toString())));
 		}
 	}
 	
 	/**
 	* Deletes an item from the task list
-	* Called when selected from the context menu
+	* Called onContextItemSelected
 	**/
 	private void delete(long id) {
 		Task t = taskListAdapter.getItem((int)id);
@@ -206,5 +234,33 @@ public class MainActivity extends Activity {
 				break;
 			}
 		}
+	}
+	
+	/**
+	 * Used to determine if tasks should be reset
+	 * Called onStart
+	 */
+	private boolean dayHasPassed(GregorianCalendar lastUsed, GregorianCalendar today) {
+		GregorianCalendar dayLastUsed = new GregorianCalendar(lastUsed.get(GregorianCalendar.YEAR), lastUsed.get(GregorianCalendar.MONTH), lastUsed.get(GregorianCalendar.DAY_OF_MONTH));
+		GregorianCalendar dayOfToday = new GregorianCalendar(today.get(GregorianCalendar.YEAR), today.get(GregorianCalendar.MONTH), today.get(GregorianCalendar.DAY_OF_MONTH));
+		if(dayOfToday.after(dayLastUsed)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Used to reset done flags on tasks
+	 * Called onStart
+	 */
+	private void resetTasks() {
+		Iterator<Task> taskIt = tasks.iterator();
+		Task t;
+		while(taskIt.hasNext()) {
+			t = taskIt.next();
+			t.markDone();
+		}
+		taskListAdapter.notifyDataSetChanged();
+		//TODO: make sure this resets strikethroughs
 	}
 }

@@ -26,7 +26,7 @@ public class AddTaskActivity extends Activity {
         	* Listener used to detect when a user is finished specifying their task
         	**/
             public void onClick(View v) {
-            	if(taskName.getText().toString() == "") {
+            	if(taskName.getText().toString().equals("")) {
             		//Cancels adding a task if the name is empty
             		setResult(RESULT_CANCELED);
                 	finish();
