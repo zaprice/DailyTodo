@@ -89,6 +89,7 @@ public class MainActivity extends Activity {
 		GregorianCalendar today = new GregorianCalendar(); 
 		if(dayHasPassed(lastUsed, today)) {
 			resetTasks();
+			lastUsed = today;
 		}
 	}
 
@@ -265,7 +266,9 @@ public class MainActivity extends Activity {
 		Task t;
 		while(taskIt.hasNext()) {
 			t = taskIt.next();
-			t.markDone();
+			if(t.isDone()) {
+				t.markDone();
+			}
 		}
 		taskListAdapter.notifyDataSetChanged();
 		//TODO: make sure this resets strikethroughs
