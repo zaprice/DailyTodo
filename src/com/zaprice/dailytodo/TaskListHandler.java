@@ -109,6 +109,11 @@ public class TaskListHandler {
 		}
 	}
 	
+	/**
+	 * Adds a task
+	 * Called onActivityResult
+	**/
+	
 	void add(String taskName) {
 		taskListAdapter.add(new Task(taskName));
 	}
