@@ -8,7 +8,6 @@ import java.util.Map;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
