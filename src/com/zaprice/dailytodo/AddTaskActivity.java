@@ -9,7 +9,7 @@ import android.widget.EditText;
  * 
  * @author zaprice
  *
- */
+**/
 public class AddTaskActivity extends Activity {
 
 	@Override
