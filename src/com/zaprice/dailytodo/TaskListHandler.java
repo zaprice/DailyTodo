@@ -7,7 +7,7 @@ import java.util.Map;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
-import android.graphics.Paint;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -28,6 +28,7 @@ public class TaskListHandler {
 	private ListView taskList;
 	private TaskListAdapter taskListAdapter;
 	private GregorianCalendar lastUsed;
+	final String TAG = "DEBUG";
 	
 	/**
 	 * Constructor
@@ -72,6 +73,8 @@ public class TaskListHandler {
 		while(tasksIt.hasNext()) {
 			t = tasksIt.next();
 			editor.putBoolean(t.toString(), t.isDone());
+			//taskName + " " is used ask the key for everyDay since users cannot input strings with trailing whitespace
+			editor.putBoolean(t.toString() + " ", t.everyDay());
 		}
 		editor.putLong("date", lastUsed.getTimeInMillis());
 		editor.apply();
@@ -85,14 +88,22 @@ public class TaskListHandler {
 	private void loadTasks() {
 		SharedPreferences data = mainActivity.getPreferences(Activity.MODE_PRIVATE);
 		Map<String, ?> dataMap = data.getAll();
+		String tempTaskName;
+		boolean tempIsDone, tempEveryDay;
 		
 		for(Map.Entry<String, ?> entry : dataMap.entrySet()) {
 			//TODO: map does not guarantee stable ordering, may not be preserved across instances; maybe should fix that
 			if(entry.getKey().equals("date")) {
 				lastUsed = new GregorianCalendar();
 				lastUsed.setTimeInMillis(Long.parseLong(entry.getValue().toString()));
+			}else if(entry.getKey().endsWith(" ")) {
+				//Do nothing; the " " at the end denotes this entry as the boolean everyDay corresponding to the key
+				//Users cannot end tasks in whitespace, so there is no chance of false positive
 			}else {
-				taskListAdapter.add(new Task(entry.getKey(), Boolean.parseBoolean(entry.getValue().toString())));
+				tempTaskName = entry.getKey();
+				tempIsDone = Boolean.parseBoolean(entry.getValue().toString());
+				tempEveryDay = Boolean.parseBoolean(dataMap.get(tempTaskName + " ").toString());
+				taskListAdapter.add(new Task(tempTaskName, tempIsDone, tempEveryDay));
 			}
 		}
 	}
@@ -114,8 +125,9 @@ public class TaskListHandler {
 	 * Called onActivityResult
 	**/
 	
-	void add(String taskName) {
-		taskListAdapter.add(new Task(taskName));
+	void add(String taskName, boolean everyDay) {
+		taskListAdapter.add(new Task(taskName, false, everyDay));
+		Log.i(TAG, "taskName " + Boolean.toString(everyDay));
 	}
 	
 	/**
@@ -132,8 +144,10 @@ public class TaskListHandler {
 	 * Called onItemClick, strikeText(String)
 	**/
 	private void strikeText(TextView t) {
-		t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
+		//t.setPaintFlags(t.getPaintFlags() ^ Paint.STRIKE_THRU_TEXT_FLAG);
 		setDoneFlag(t.getText().toString());
+		taskListAdapter.notifyDataSetChanged();
+		
 	}
 	
 	/**
@@ -166,7 +180,7 @@ public class TaskListHandler {
 	}
 	
 	/**
-	 * Used to reset done flags on tasks
+	 * Used to reset done flags on tasks, remove finished one-off tasks
 	 * Called onStart
 	**/
 	private void resetTasks() {
@@ -174,8 +188,10 @@ public class TaskListHandler {
 		Task t;
 		while(taskIt.hasNext()) {
 			t = taskIt.next();
-			if(t.isDone()) {
+			if(t.isDone() && t.everyDay()) {
 				t.markDone();
+			}else if(t.isDone() && !t.everyDay()) {
+				taskIt.remove();
 			}
 		}
 		taskListAdapter.notifyDataSetChanged();

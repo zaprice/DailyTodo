@@ -23,6 +23,7 @@ public class MainActivity extends Activity {
 	 * TODO list:
 	 * Spacing between list items is not quite uniform, maybe?
 	 * Add support for one-off tasks
+	 * Storage of boolean everyDay is a trailing whitespace hack; maybe try to do this more elegantly
 	**/
 	
 	//Constants
@@ -116,7 +117,7 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if(resultCode == RESULT_OK) {
 			Bundle taskBundle = data.getExtras();
-			taskListHandler.add(taskBundle.getString("task name"));
+			taskListHandler.add(taskBundle.getString("task name"), taskBundle.getBoolean("every day"));
 		}
 	}
 	

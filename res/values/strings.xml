@@ -7,5 +7,9 @@
     <string name="add_task">Add Task</string>
     <string name="task_name">Task Name</string>
     <string name="delete">Delete</string>
+    <string-array name="spinner_array">
+        <item>Every Day</item>
+        <item>Only Once</item>
+    </string-array>
 
 </resources>
