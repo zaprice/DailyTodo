@@ -73,7 +73,7 @@ public class TaskListHandler {
 		while(tasksIt.hasNext()) {
 			t = tasksIt.next();
 			editor.putBoolean(t.toString(), t.isDone());
-			//taskName + " " is used ask the key for everyDay since users cannot input strings with trailing whitespace
+			//taskName + " " is used as the key for everyDay since users cannot input strings with trailing whitespace
 			editor.putBoolean(t.toString() + " ", t.everyDay());
 		}
 		editor.putLong("date", lastUsed.getTimeInMillis());
